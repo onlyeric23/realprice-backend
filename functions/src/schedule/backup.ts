@@ -1,12 +1,8 @@
-import * as functions from "firebase-functions";
 import { backupPrice } from "../core/backup";
+import { firebaseScheduler } from "../core";
 
-const scheduledBackupPrice = functions.pubsub
-  .schedule("0 1 * * *")
-  .timeZone("Asia/Taipei")
-  .onRun(async () => {
-    await backupPrice();
-    return null;
-  });
+const scheduledBackupPrice = firebaseScheduler(async () => {
+  await backupPrice();
+}, "0 1 * * *");
 
 export default scheduledBackupPrice;

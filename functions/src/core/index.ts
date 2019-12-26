@@ -9,7 +9,7 @@ export type Handler = (
 ) => void;
 
 export const firebaseRequestHandler = (handler: Handler) =>
-  functions.https.onRequest(async (request, response) => {
+  functions.https.onRequest((request, response) => {
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount as ServiceAccount),
       storageBucket: CLOUD_STORAGE_BUCKET
@@ -17,5 +17,25 @@ export const firebaseRequestHandler = (handler: Handler) =>
 
     handler(request, response);
   });
+
+export type Scheduler = () => void;
+
+export const firebaseScheduler = (
+  scheduler: Scheduler,
+  schedule: string,
+  timezone: string = "Asia/Taipei"
+) =>
+  functions.pubsub
+    .schedule(schedule)
+    .timeZone(timezone)
+    .onRun(() => {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount as ServiceAccount),
+        storageBucket: CLOUD_STORAGE_BUCKET
+      });
+
+      scheduler();
+      return null;
+    });
 
 export default firebaseRequestHandler;
