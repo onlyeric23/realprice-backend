@@ -6,8 +6,15 @@ import {
 } from "../config";
 import { ISO8601 } from "../core/regex";
 
+export const getRealPriceFilename = (date: Date | string) => {
+  if (date instanceof Date) {
+    return `${RESOURCE_REAL_PRICE_PREFIX}_${date.toISOString()}.${RESOURCE_REAL_PRICE_EXT}`;
+  }
+  return `${RESOURCE_REAL_PRICE_PREFIX}_${date}.${RESOURCE_REAL_PRICE_EXT}`;
+};
+
 export const getRealPriceBucketPrefix = (date: Date) =>
-  `${STORAGE_RESOURCES}/${RESOURCE_REAL_PRICE_PREFIX}_${date.toISOString()}.${RESOURCE_REAL_PRICE_EXT}`;
+  `${STORAGE_RESOURCES}/${getRealPriceFilename(date)}`;
 
 export const fetchStoredRealPriceDates = () => {
   const bucket = admin.storage().bucket();

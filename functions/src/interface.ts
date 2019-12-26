@@ -1,0 +1,30 @@
+export interface RealPriceItem {
+  CASE_T: string;
+  DISTRICT: string;
+  CASE_F: string;
+  LOCATION: string;
+  LANDA: string;
+  LANDA_Z: string;
+  SDATE: string;
+  SCNT: string;
+  SBUILD: string;
+  TBUILD: string;
+  BUITYPE: string;
+  PBUILD: string;
+  MBUILD: string;
+  FDATE: string;
+  FAREA: string;
+  BUILD_R: string;
+  BUILD_L: string;
+  BUILD_B: string;
+  BUILD_P: string;
+  RULE: string;
+  BUILD_C: string;
+  TPRICE: string;
+  UPRICE: string;
+  UPNOTE: string;
+  PARKTYPE: string;
+  PAREA: string;
+  PPRICE: string;
+  RMNOTE: string;
+}
