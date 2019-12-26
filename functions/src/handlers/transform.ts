@@ -81,12 +81,14 @@ const transformPrice = firebaseRequestHandler(async (_, response) => {
 
   const untransformedDates = getUntransformedDates(prices, dates);
 
-  console.debug("untransformedDates", untransformedDates);
+  // console.debug("untransformedDates", untransformedDates);
 
   if (untransformedDates.length === 0) {
+    const message = "Already up-to-date.";
+    console.info(message);
     response
       .status(200)
-      .send("Already up-to-date.")
+      .send(message)
       .end();
   } else {
     untransformedDates.forEach(async date => {
@@ -94,13 +96,13 @@ const transformPrice = firebaseRequestHandler(async (_, response) => {
       // console.debug("transformed", transformed);
       await storeTransformed(date, transformed);
     });
+    const message = `Transform following RealPrice.xml success.\n${untransformedDates
+      .map(getRealPriceFilename)
+      .join(",\n")}`;
+    console.info(message);
     response
       .status(200)
-      .send(
-        `Transform following RealPrice.xml success.\n${untransformedDates
-          .map(getRealPriceFilename)
-          .join(",\n")}`
-      )
+      .send(message)
       .end();
   }
 });
