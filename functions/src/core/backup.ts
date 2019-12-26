@@ -32,7 +32,7 @@ export enum BackupResult {
 }
 
 export const backupPrice = async (
-  onSuccess?: (result: BackupResult, backupName?: string) => void
+  onSuccess?: (result: BackupResult, message: string) => void
 ) => {
   const [price, latestStoredPrice] = await Promise.all([
     fetchRealPrice(),
@@ -42,8 +42,10 @@ export const backupPrice = async (
   const latestChecksum = generateChecksum(latestStoredPrice);
 
   if (currentChecksum === latestChecksum) {
+    const message = "Already up-to-date.";
+    console.info(message);
     if (onSuccess) {
-      onSuccess(BackupResult.ALREADY_EXIST);
+      onSuccess(BackupResult.ALREADY_EXIST, message);
     }
   } else {
     const backupName = getRealPriceBucketPrefix(new Date());
@@ -52,7 +54,8 @@ export const backupPrice = async (
     stream.write(price);
     stream.end();
     if (onSuccess) {
-      onSuccess(BackupResult.BACKUP_NEW_FILE);
+      const message = `Backup new file ${backupName}`;
+      onSuccess(BackupResult.BACKUP_NEW_FILE, message);
     }
   }
 };
