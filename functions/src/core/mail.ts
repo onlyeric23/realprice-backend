@@ -1,5 +1,6 @@
 import sgMail from "@sendgrid/mail";
 import { ADMIN_EMAIL } from "../config";
+import { inspect } from "util";
 
 export const notifyException = ({
   text,
@@ -16,7 +17,5 @@ export const notifyException = ({
     text,
     html
   };
-  return sgMail
-    .send(msg)
-    .catch(error => console.error(error));
+  return sgMail.send(msg).catch(error => console.error(inspect(error)));
 };

@@ -3,6 +3,7 @@ import admin, { ServiceAccount } from "firebase-admin";
 import serviceAccount from "../realprice-45367-firebase-adminsdk-8lcoy-c19f244bc7.json";
 import { CLOUD_STORAGE_BUCKET } from "../config.js";
 import { notifyException } from "./mail.js";
+import { inspect } from "util";
 
 const handleException = async (
   error: any,
@@ -12,7 +13,7 @@ const handleException = async (
   }
 ) => {
   return await notifyException({
-    text: JSON.stringify(
+    text: inspect(
       {
         ...from,
         error
@@ -38,6 +39,7 @@ export const firebaseRequestHandler = (handler: Handler) =>
       handler(request, response);
     } catch (error) {
       await handleException(error, { request });
+      response.send(400).end();
     }
   });
 
