@@ -11,3 +11,6 @@ export const STORAGE_RESOURCES = "resources";
 // Firestore
 export const DB_COLLECTION_REAL_PRICE = "realPrice";
 export const DB_COLLECTION_ITEMS = "items";
+
+// Admin
+export const ADMIN_EMAIL = "onlyeric23@gmail.com";

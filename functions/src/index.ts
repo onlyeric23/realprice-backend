@@ -1,4 +1,5 @@
-export { default as backupPrice } from "./handlers/backup";
-export { default as transformPrice } from "./handlers/transform";
+export * from "./handlers/backup";
+export * from "./handlers/transform";
+export * from "./handlers/hello";
 
-export { default as backupScheduler } from "./schedule/backup";
+export * from "./schedule/backup";

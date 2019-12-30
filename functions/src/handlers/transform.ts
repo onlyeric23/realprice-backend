@@ -70,7 +70,7 @@ const storeTransformed = async (date: string, transformed: RealPriceItem[]) => {
   );
 };
 
-const transformPrice = firebaseRequestHandler(async (_, response) => {
+export const transformPrice = firebaseRequestHandler(async (_, response) => {
   const [prices, dates] = await Promise.all([
     fetchPriceDocData(),
     fetchStoredRealPriceDates()
@@ -106,5 +106,3 @@ const transformPrice = firebaseRequestHandler(async (_, response) => {
       .end();
   }
 });
-
-export default transformPrice;
