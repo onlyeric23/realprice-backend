@@ -12,16 +12,19 @@ const handleException = async (
     context?: functions.EventContext;
   }
 ) => {
-  return await notifyException({
-    text: inspect(
-      {
-        ...from,
-        error
-      },
-      undefined,
-      2
-    )
-  });
+  if (process.env.NODE_ENV === "production") {
+    return await notifyException({
+      text: inspect(
+        {
+          ...from,
+          error
+        },
+        undefined,
+        2
+      )
+    });
+  }
+  console.error(error);
 };
 
 export type Handler = (
