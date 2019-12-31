@@ -60,7 +60,7 @@ const expandRawByLocation = (raw: RAW_TAIPEI) => {
   }
   return Array(parseInt(to) - parseInt(from) + 1)
     .fill(0)
-    .map((_, index) => ({
+    .map((__, index) => ({
       ...raw,
       LOCATION: raw.LOCATION.replace(range, String(parseInt(to) + index))
     }));
