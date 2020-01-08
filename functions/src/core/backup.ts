@@ -1,5 +1,5 @@
 import https from "https";
-import { Readable } from "stream";
+import { Readable, Writable } from "stream";
 import admin from "firebase-admin";
 import { GOV_REAL_PRICE_DATA } from "../config";
 import { readableToString } from "./utils";
@@ -23,13 +23,22 @@ const fetchLatestStoredRealPriceDate = () => {
 };
 
 const fetchLatestStoredRealPrice = () => {
-  return fetchLatestStoredRealPriceDate().then(fetchStoredRealPriceByDate);
+  return fetchLatestStoredRealPriceDate().then(date => {
+    console.debug("date", date);
+    return date ? fetchStoredRealPriceByDate(date) : null;
+  });
 };
 
 export enum BackupResult {
   ALREADY_EXIST,
   BACKUP_NEW_FILE
 }
+
+const writeStreamProm = (chunk: any, stream: Writable) =>
+  new Promise((resolve, reject) => {
+    stream.on("error", reject);
+    stream.end(chunk, resolve);
+  });
 
 export const backupPrice = async (
   onSuccess?: (result: BackupResult, message: string) => void
@@ -38,8 +47,10 @@ export const backupPrice = async (
     fetchRealPrice(),
     fetchLatestStoredRealPrice()
   ]);
-  const currentChecksum = generateChecksum(price);
-  const latestChecksum = generateChecksum(latestStoredPrice);
+  const currentChecksum = generateChecksum(price!);
+  const latestChecksum = latestStoredPrice
+    ? generateChecksum(latestStoredPrice)
+    : null;
 
   if (currentChecksum === latestChecksum) {
     const message = "Already up-to-date.";
@@ -50,11 +61,16 @@ export const backupPrice = async (
   } else {
     const backupName = getRealPriceBucketPrefix(new Date());
     const bucket = admin.storage().bucket();
-    const stream = bucket.file(backupName).createWriteStream();
-    stream.write(price);
-    stream.end();
+    const file = bucket.file(backupName);
+    const stream = file.createWriteStream();
+    await writeStreamProm(price, stream).then(() =>
+      file.setMetadata({
+        contentType: "text/xml"
+      })
+    );
+    const message = `Backup new file ${backupName}`;
+    console.info(message);
     if (onSuccess) {
-      const message = `Backup new file ${backupName}`;
       onSuccess(BackupResult.BACKUP_NEW_FILE, message);
     }
   }

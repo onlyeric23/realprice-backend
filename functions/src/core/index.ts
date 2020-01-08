@@ -5,6 +5,11 @@ import { CLOUD_STORAGE_BUCKET } from "../config.js";
 import { notifyException } from "./mail.js";
 import { inspect } from "util";
 
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount as ServiceAccount),
+  storageBucket: CLOUD_STORAGE_BUCKET
+});
+
 const handleException = async (
   error: any,
   from: {
@@ -35,10 +40,6 @@ export type Handler = (
 export const firebaseRequestHandler = (handler: Handler) =>
   functions.https.onRequest(async (request, response) => {
     try {
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount as ServiceAccount),
-        storageBucket: CLOUD_STORAGE_BUCKET
-      });
       handler(request, response);
     } catch (error) {
       await handleException(error, { request });
@@ -58,11 +59,6 @@ export const firebaseScheduler = (
     .timeZone(timezone)
     .onRun(async context => {
       try {
-        admin.initializeApp({
-          credential: admin.credential.cert(serviceAccount as ServiceAccount),
-          storageBucket: CLOUD_STORAGE_BUCKET
-        });
-
         scheduler();
         return null;
       } catch (error) {
