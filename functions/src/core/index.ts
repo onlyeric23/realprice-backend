@@ -35,19 +35,19 @@ const handleException = async (
 export type Handler = (
   request: functions.https.Request,
   response: functions.Response
-) => void;
+) => void | Promise<void>;
 
 export const firebaseRequestHandler = (handler: Handler) =>
   functions.https.onRequest(async (request, response) => {
     try {
-      handler(request, response);
+      await handler(request, response);
     } catch (error) {
       await handleException(error, { request });
-      response.send(400).end();
+      response.status(400).end();
     }
   });
 
-export type Scheduler = () => void;
+export type Scheduler = () => void | Promise<void>;
 
 export const firebaseScheduler = (
   scheduler: Scheduler,
@@ -59,8 +59,7 @@ export const firebaseScheduler = (
     .timeZone(timezone)
     .onRun(async context => {
       try {
-        scheduler();
-        return null;
+        await scheduler();
       } catch (error) {
         await handleException(error, { context });
       }
