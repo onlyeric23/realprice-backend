@@ -1,14 +1,14 @@
-import https from "https";
-import { Readable, Writable } from "stream";
-import admin from "firebase-admin";
-import { GOV_REAL_PRICE_DATA } from "../config";
-import { readableToString } from "./utils";
-import { generateChecksum } from "../core/utils.js";
+import admin from 'firebase-admin';
+import https from 'https';
+import { Readable, Writable } from 'stream';
+import { GOV_REAL_PRICE_DATA } from '../config';
 import {
-  getRealPriceBucketPrefix,
+  fetchStoredRealPriceByDate,
   fetchStoredRealPriceDates,
-  fetchStoredRealPriceByDate
-} from "../core/storage";
+  getRealPriceBucketPrefix,
+} from '../core/storage';
+import { generateChecksum } from '../core/utils.js';
+import { readableToString } from './utils';
 
 const fetchRealPrice = () => {
   return new Promise<Readable>(resolve => {
@@ -18,25 +18,25 @@ const fetchRealPrice = () => {
 
 const fetchLatestStoredRealPriceDate = () => {
   return fetchStoredRealPriceDates().then(dates =>
-    dates.reduce((max, curr) => (curr > max ? curr : max), "")
+    dates.reduce((max, curr) => (curr > max ? curr : max), '')
   );
 };
 
 const fetchLatestStoredRealPrice = () => {
   return fetchLatestStoredRealPriceDate().then(date => {
-    console.debug("date", date);
+    console.debug('date', date);
     return date ? fetchStoredRealPriceByDate(date) : null;
   });
 };
 
 export enum BackupResult {
   ALREADY_EXIST,
-  BACKUP_NEW_FILE
+  BACKUP_NEW_FILE,
 }
 
 const writeStreamProm = (chunk: any, stream: Writable) =>
   new Promise((resolve, reject) => {
-    stream.on("error", reject);
+    stream.on('error', reject);
     stream.end(chunk, resolve);
   });
 
@@ -45,7 +45,7 @@ export const backupPrice = async (
 ) => {
   const [price, latestStoredPrice] = await Promise.all([
     fetchRealPrice(),
-    fetchLatestStoredRealPrice()
+    fetchLatestStoredRealPrice(),
   ]);
   const currentChecksum = generateChecksum(price!);
   const latestChecksum = latestStoredPrice
@@ -53,7 +53,7 @@ export const backupPrice = async (
     : null;
 
   if (currentChecksum === latestChecksum) {
-    const message = "Already up-to-date.";
+    const message = 'Already up-to-date.';
     console.info(message);
     if (onSuccess) {
       onSuccess(BackupResult.ALREADY_EXIST, message);
@@ -65,7 +65,7 @@ export const backupPrice = async (
     const stream = file.createWriteStream();
     await writeStreamProm(price, stream).then(() =>
       file.setMetadata({
-        contentType: "text/xml"
+        contentType: 'text/xml',
       })
     );
     const message = `Backup new file ${backupName}`;

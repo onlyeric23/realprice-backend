@@ -1,22 +1,22 @@
-import firebaseRequestHandler from "../core/index.js";
-import { parseStringPromise } from "xml2js";
+import admin from 'firebase-admin';
+import get from 'lodash/get';
+import { inspect } from 'util';
+import { parseStringPromise } from 'xml2js';
+import { DB_COLLECTION_ITEMS, DB_COLLECTION_REAL_PRICE } from '../config.js';
+import { FIRESTORE_BATCH_WRITE_MAX } from '../core/constant';
+import firebaseRequestHandler from '../core/index.js';
+import { IRawTaipei } from '../core/interface.js';
+import { ADDRESS_TP } from '../core/regex.js';
 import {
+  fetchStoredRealPriceByDate,
   fetchStoredRealPriceDates,
   getRealPriceFilename,
-  fetchStoredRealPriceByDate
-} from "../core/storage.js";
-import admin from "firebase-admin";
-import { DB_COLLECTION_REAL_PRICE, DB_COLLECTION_ITEMS } from "../config.js";
-import get from "lodash/get";
-import { RealPriceItem } from "../interface.js";
-import { ADDRESS_TP } from "../core/regex.js";
-import { inspect } from "util";
-import { RAW_TAIPEI } from "../core/interface.js";
-import { FIRESTORE_BATCH_WRITE_MAX } from "../core/constant";
+} from '../core/storage.js';
+import { IRealPriceItem } from '../interface.js';
 
 const fetchPriceDocData = async () => {
   const db = admin.firestore();
-  return await db
+  return db
     .collection(DB_COLLECTION_REAL_PRICE)
     .get()
     .then(snap => snap.docs.map(doc => doc.data()));
@@ -36,20 +36,20 @@ const getUntransformedDates = (
 
 const stripRealPriceToRows = (parsedRealPrice: any) => {
   return get(parsedRealPrice, [
-    "soap:Envelope",
-    "soap:Body",
+    'soap:Envelope',
+    'soap:Body',
     0,
-    "RPWeekDataResponse",
+    'RPWeekDataResponse',
     0,
-    "RPWeekDataResult",
+    'RPWeekDataResult',
     0,
-    "Rows",
+    'Rows',
     0,
-    "Row"
+    'Row',
   ]);
 };
 
-const expandRawByLocation = (raw: RAW_TAIPEI) => {
+const expandRawByLocation = (raw: IRawTaipei) => {
   const matched = raw.LOCATION.match(ADDRESS_TP);
   if (!matched) {
     throw Error(`Location not matched: ${inspect(raw)}`);
@@ -62,7 +62,7 @@ const expandRawByLocation = (raw: RAW_TAIPEI) => {
     .fill(0)
     .map((__, index) => ({
       ...raw,
-      LOCATION: raw.LOCATION.replace(range, String(parseInt(to) + index))
+      LOCATION: raw.LOCATION.replace(range, String(parseInt(to) + index)),
     }));
 };
 
@@ -73,30 +73,33 @@ const transformByDate = async (date: string) => {
   const transformed = rows
     .map((row: any) => {
       return Object.keys(row).reduce((accu, col) => {
-        const colData = row[col][0]["$"];
+        const colData = row[col][0].$;
         const name = Object.keys(colData)[0];
         const value = colData[name];
         return { ...accu, [name]: value };
       }, {});
     })
     .reduce(
-      (accu: RAW_TAIPEI[], regionItem: RAW_TAIPEI) => [
+      (accu: IRawTaipei[], regionItem: IRawTaipei) => [
         ...accu,
-        ...expandRawByLocation(regionItem)
+        ...expandRawByLocation(regionItem),
       ],
       []
     );
   return transformed;
 };
 
-const storeTransformed = async (date: string, transformed: RealPriceItem[]) => {
+const storeTransformed = async (
+  date: string,
+  transformed: IRealPriceItem[]
+) => {
   const db = admin.firestore();
   const doc = await db.collection(DB_COLLECTION_REAL_PRICE).add({
-    name: getRealPriceFilename(date)
+    name: getRealPriceFilename(date),
   });
   const collection = doc.collection(DB_COLLECTION_ITEMS);
 
-  const chunks: Array<Array<RealPriceItem>> = [];
+  const chunks: IRealPriceItem[][] = [];
   transformed.forEach((item, index) => {
     if (index % FIRESTORE_BATCH_WRITE_MAX === 0) {
       chunks.push([]);
@@ -123,7 +126,7 @@ const transformSingleDate = async (date: string) => {
 export const transformPrice = firebaseRequestHandler(async (_, response) => {
   const [prices, dates] = await Promise.all([
     fetchPriceDocData(),
-    fetchStoredRealPriceDates()
+    fetchStoredRealPriceDates(),
   ]);
 
   // console.debug("priceDocs", prices);
@@ -134,7 +137,7 @@ export const transformPrice = firebaseRequestHandler(async (_, response) => {
   // console.debug("untransformedDates", untransformedDates);
 
   if (untransformedDates.length === 0) {
-    const message = "Already up-to-date.";
+    const message = 'Already up-to-date.';
     console.info(message);
     response
       .status(200)
@@ -144,7 +147,7 @@ export const transformPrice = firebaseRequestHandler(async (_, response) => {
     await Promise.all(untransformedDates.map(transformSingleDate));
     const message = `Transform following RealPrice.xml success.\n${untransformedDates
       .map(getRealPriceFilename)
-      .join(",\n")}`;
+      .join(',\n')}`;
     console.info(message);
     response
       .status(200)

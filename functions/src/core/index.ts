@@ -1,13 +1,13 @@
-import * as functions from "firebase-functions";
-import admin, { ServiceAccount } from "firebase-admin";
-import serviceAccount from "../realprice-45367-firebase-adminsdk-8lcoy-c19f244bc7.json";
-import { CLOUD_STORAGE_BUCKET } from "../config.js";
-import { notifyException } from "./mail.js";
-import { inspect } from "util";
+import admin, { ServiceAccount } from 'firebase-admin';
+import * as functions from 'firebase-functions';
+import { inspect } from 'util';
+import { CLOUD_STORAGE_BUCKET } from '../config.js';
+import serviceAccount from '../realprice-45367-firebase-adminsdk-8lcoy-c19f244bc7.json';
+import { notifyException } from './mail.js';
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount as ServiceAccount),
-  storageBucket: CLOUD_STORAGE_BUCKET
+  storageBucket: CLOUD_STORAGE_BUCKET,
 });
 
 const handleException = async (
@@ -17,16 +17,16 @@ const handleException = async (
     context?: functions.EventContext;
   }
 ) => {
-  if (process.env.NODE_ENV === "production") {
-    return await notifyException({
+  if (process.env.NODE_ENV === 'production') {
+    return notifyException({
       text: inspect(
         {
           ...from,
-          error
+          error,
         },
         undefined,
         2
-      )
+      ),
     });
   }
   console.error(error);
@@ -52,7 +52,7 @@ export type Scheduler = () => void | Promise<void>;
 export const firebaseScheduler = (
   scheduler: Scheduler,
   schedule: string,
-  timezone: string = "Asia/Taipei"
+  timezone: string = 'Asia/Taipei'
 ) =>
   functions.pubsub
     .schedule(schedule)

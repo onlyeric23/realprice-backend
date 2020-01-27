@@ -1,4 +1,4 @@
-export interface RAW_TAIPEI {
+export interface IRawTaipei {
   CASE_T: string;
   DISTRICT: string;
   CASE_F: string;

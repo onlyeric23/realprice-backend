@@ -1,4 +1,4 @@
-export interface RealPriceItem {
+export interface IRealPriceItem {
   // 成交案件類型
   CASE_T: string;
   // 行政區

@@ -1,10 +1,10 @@
-import admin from "firebase-admin";
+import admin from 'firebase-admin';
 import {
-  STORAGE_RESOURCES,
+  RESOURCE_REAL_PRICE_EXT,
   RESOURCE_REAL_PRICE_PREFIX,
-  RESOURCE_REAL_PRICE_EXT
-} from "../config";
-import { ISO8601 } from "../core/regex";
+  STORAGE_RESOURCES,
+} from '../config';
+import { ISO8601 } from '../core/regex';
 
 export const getRealPriceFilename = (date: Date | string) => {
   if (date instanceof Date) {
@@ -21,15 +21,15 @@ export const fetchStoredRealPriceDates = () => {
   const matchPattern = new RegExp(
     `^${STORAGE_RESOURCES}/` +
       RESOURCE_REAL_PRICE_PREFIX +
-      "_(" +
+      '_(' +
       ISO8601.source +
-      ")\\." +
+      ')\\.' +
       RESOURCE_REAL_PRICE_EXT +
-      "$"
+      '$'
   );
   return bucket
     .getFiles({
-      prefix: `${STORAGE_RESOURCES}/${RESOURCE_REAL_PRICE_PREFIX}`
+      prefix: `${STORAGE_RESOURCES}/${RESOURCE_REAL_PRICE_PREFIX}`,
     })
     .then(([files]) => files)
     .then(files => {
@@ -50,7 +50,7 @@ export const fetchStoredRealPriceByDate = (date: Date | string) => {
   const bucket = admin.storage().bucket();
   return bucket
     .getFiles({
-      prefix: getRealPriceBucketPrefix(new Date(date))
+      prefix: getRealPriceBucketPrefix(new Date(date)),
     })
     .then(([files]) => files[0])
     .then(file => file.download())
