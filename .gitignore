@@ -66,3 +66,4 @@ node_modules/
 
 # sensitive files
 config.json
+lib/
