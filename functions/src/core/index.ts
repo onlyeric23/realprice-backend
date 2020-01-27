@@ -64,5 +64,3 @@ export const firebaseScheduler = (
         await handleException(error, { context });
       }
     });
-
-export default firebaseRequestHandler;

@@ -1,4 +1,4 @@
-import firebaseRequestHandler from '../core';
+import { firebaseRequestHandler } from '../core';
 import { notifyException } from '../core/mail';
 
 export const helloMail = firebaseRequestHandler(async (_, response) => {

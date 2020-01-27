@@ -4,7 +4,7 @@ import { inspect } from 'util';
 import { parseStringPromise } from 'xml2js';
 import { DB_COLLECTION_ITEMS, DB_COLLECTION_REAL_PRICE } from '../config.js';
 import { FIRESTORE_BATCH_WRITE_MAX } from '../core/constant';
-import firebaseRequestHandler from '../core/index.js';
+import { firebaseRequestHandler } from '../core/index.js';
 import { IRawTaipei } from '../core/interface.js';
 import { ADDRESS_TP } from '../core/regex.js';
 import {
