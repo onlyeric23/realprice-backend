@@ -2,14 +2,17 @@ import admin from 'firebase-admin';
 import get from 'lodash/get';
 import { inspect } from 'util';
 import { parseStringPromise } from 'xml2js';
-import { DB_COLLECTION_ITEMS, DB_COLLECTION_REAL_PRICE } from '../config.js';
-import { FIRESTORE_BATCH_WRITE_MAX } from '../core/constant';
+import {
+  DB_COLLECTION_ITEMS,
+  DB_COLLECTION_REAL_PRICE,
+  FIRESTORE_BATCH_WRITE_MAX,
+} from '../core/constant';
 import { firebaseRequestHandler } from '../core/index.js';
 import { IRawTaipei } from '../core/interface.js';
 import { ADDRESS_TP } from '../core/regex.js';
 import {
+  fetchLatestStoredRealPriceDate,
   fetchStoredRealPriceByDate,
-  fetchStoredRealPriceDates,
   getRealPriceFilename,
 } from '../core/storage.js';
 import { IRealPriceItem } from '../interface.js';
@@ -26,11 +29,9 @@ const getUntransformedDates = (
   prices: FirebaseFirestore.DocumentData[],
   dates: string[]
 ) => {
-  const priceNameSet = new Set(prices.map(price => price.name));
+  const priceDateSet = new Set(prices.map(price => price.date));
   return dates.reduce((accu, date) => {
-    return priceNameSet.has(getRealPriceFilename(date))
-      ? accu
-      : [...accu, date];
+    return priceDateSet.has(date) ? accu : [...accu, date];
   }, [] as string[]);
 };
 
@@ -96,6 +97,7 @@ const storeTransformed = async (
   const db = admin.firestore();
   const doc = await db.collection(DB_COLLECTION_REAL_PRICE).add({
     name: getRealPriceFilename(date),
+    date,
   });
   const collection = doc.collection(DB_COLLECTION_ITEMS);
 
@@ -124,15 +126,23 @@ const transformSingleDate = async (date: string) => {
 };
 
 export const transformPrice = firebaseRequestHandler(async (_, response) => {
-  const [prices, dates] = await Promise.all([
-    fetchPriceDocData(),
-    fetchStoredRealPriceDates(),
-  ]);
-
+  // const [prices, dates] = await Promise.all([
+  //   fetchPriceDocData(),
+  //   fetchStoredRealPriceDates(),
+  // ]);
   // console.debug("priceDocs", prices);
   // console.debug("dates", dates);
+  // const untransformedDates = getUntransformedDates(prices, dates);
 
-  const untransformedDates = getUntransformedDates(prices, dates);
+  const [prices, latestStoredFileDate] = await Promise.all([
+    fetchPriceDocData(),
+    fetchLatestStoredRealPriceDate(),
+  ]);
+  // console.debug('priceDocs', prices);
+  // console.debug('latestStoredFileDate', latestStoredFileDate);
+  const untransformedDates = getUntransformedDates(prices, [
+    latestStoredFileDate,
+  ]);
 
   // console.debug("untransformedDates", untransformedDates);
 

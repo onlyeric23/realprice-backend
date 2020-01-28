@@ -1,33 +1,12 @@
 import admin from 'firebase-admin';
-import https from 'https';
-import { Readable, Writable } from 'stream';
-import { GOV_REAL_PRICE_DATA } from '../config';
+import { Writable } from 'stream';
+
 import {
-  fetchStoredRealPriceByDate,
-  fetchStoredRealPriceDates,
+  fetchLatestStoredRealPrice,
+  fetchRealPriceFile,
   getRealPriceBucketPrefix,
-} from '../core/storage';
-import { generateChecksum } from '../core/utils.js';
-import { readableToString } from './utils';
-
-const fetchRealPrice = () => {
-  return new Promise<Readable>(resolve => {
-    https.get(GOV_REAL_PRICE_DATA, resolve);
-  }).then(readableToString);
-};
-
-const fetchLatestStoredRealPriceDate = () => {
-  return fetchStoredRealPriceDates().then(dates =>
-    dates.reduce((max, curr) => (curr > max ? curr : max), '')
-  );
-};
-
-const fetchLatestStoredRealPrice = () => {
-  return fetchLatestStoredRealPriceDate().then(date => {
-    console.debug('date', date);
-    return date ? fetchStoredRealPriceByDate(date) : null;
-  });
-};
+} from './storage';
+import { generateChecksum } from './utils.js';
 
 export enum BackupResult {
   ALREADY_EXIST,
@@ -43,8 +22,9 @@ const writeStreamProm = (chunk: any, stream: Writable) =>
 export const backupPrice = async (
   onSuccess?: (result: BackupResult, message: string) => void
 ) => {
+  // Fetch the latest stored file and the current file.
   const [price, latestStoredPrice] = await Promise.all([
-    fetchRealPrice(),
+    fetchRealPriceFile(),
     fetchLatestStoredRealPrice(),
   ]);
   const currentChecksum = generateChecksum(price!);
@@ -52,6 +32,9 @@ export const backupPrice = async (
     ? generateChecksum(latestStoredPrice)
     : null;
 
+  // Compare the latest stored file and the current file.
+  // If they are the same, it is already up-to-date.
+  // Otherwise, store the current file to Storage.
   if (currentChecksum === latestChecksum) {
     const message = 'Already up-to-date.';
     console.info(message);
@@ -63,11 +46,16 @@ export const backupPrice = async (
     const bucket = admin.storage().bucket();
     const file = bucket.file(backupName);
     const stream = file.createWriteStream();
-    await writeStreamProm(price, stream).then(() =>
-      file.setMetadata({
-        contentType: 'text/xml',
-      })
-    );
+    await writeStreamProm(price, stream)
+      .then(() =>
+        file.setMetadata({
+          contentType: 'text/xml',
+        })
+      )
+      .catch(error => {
+        console.warn(error);
+        return file.delete();
+      });
     const message = `Backup new file ${backupName}`;
     console.info(message);
     if (onSuccess) {

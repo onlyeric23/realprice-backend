@@ -65,5 +65,4 @@ node_modules/
 .env
 
 # sensitive files
-realprice-45367-firebase-adminsdk-8lcoy-c19f244bc7.json
-sendgrid.env
+config.json

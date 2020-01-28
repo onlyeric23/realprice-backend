@@ -1,10 +1,21 @@
 import admin from 'firebase-admin';
+import { Readable } from 'stream';
 import {
+  GOV_REAL_PRICE_DATA,
   RESOURCE_REAL_PRICE_EXT,
   RESOURCE_REAL_PRICE_PREFIX,
   STORAGE_RESOURCES,
-} from '../config';
+} from '../core/constant';
 import { ISO8601 } from '../core/regex';
+
+import https from 'https';
+import { readableToString } from './utils';
+
+export const fetchRealPriceFile = () => {
+  return new Promise<Readable>(resolve => {
+    https.get(GOV_REAL_PRICE_DATA, resolve);
+  }).then(readableToString);
+};
 
 export const getRealPriceFilename = (date: Date | string) => {
   if (date instanceof Date) {
@@ -55,4 +66,16 @@ export const fetchStoredRealPriceByDate = (date: Date | string) => {
     .then(([files]) => files[0])
     .then(file => file.download())
     .then(([contents]) => contents);
+};
+
+export const fetchLatestStoredRealPriceDate = () => {
+  return fetchStoredRealPriceDates().then(dates =>
+    dates.reduce((max, curr) => (curr > max ? curr : max), '')
+  );
+};
+
+export const fetchLatestStoredRealPrice = () => {
+  return fetchLatestStoredRealPriceDate().then(date => {
+    return date ? fetchStoredRealPriceByDate(date) : null;
+  });
 };

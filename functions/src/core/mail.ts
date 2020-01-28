@@ -1,6 +1,7 @@
 import sgMail from '@sendgrid/mail';
 import { inspect } from 'util';
-import { ADMIN_EMAIL } from '../config';
+import { SENDGRID_API_KEY } from '../config.json';
+import { ADMIN_EMAIL } from './constant.js';
 
 export const notifyException = ({
   text,
@@ -9,7 +10,7 @@ export const notifyException = ({
   text?: string;
   html?: string;
 }) => {
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
+  sgMail.setApiKey(SENDGRID_API_KEY!);
   const msg = {
     to: ADMIN_EMAIL,
     from: 'error@realprice.com.tw',

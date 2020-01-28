@@ -1,12 +1,12 @@
 import admin, { ServiceAccount } from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import { inspect } from 'util';
-import { CLOUD_STORAGE_BUCKET } from '../config.js';
-import serviceAccount from '../realprice-45367-firebase-adminsdk-8lcoy-c19f244bc7.json';
+import { FIREBASE_ADMINSDK } from '../config.json';
+import { CLOUD_STORAGE_BUCKET } from './constant.js';
 import { notifyException } from './mail.js';
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount as ServiceAccount),
+  credential: admin.credential.cert(FIREBASE_ADMINSDK as ServiceAccount),
   storageBucket: CLOUD_STORAGE_BUCKET,
 });
 
