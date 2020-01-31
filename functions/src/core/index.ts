@@ -43,7 +43,7 @@ export const firebaseRequestHandler = (handler: Handler) =>
       await handler(request, response);
     } catch (error) {
       await handleException(error, { request });
-      response.status(400).end();
+      response.sendStatus(400).end();
     }
   });
 
