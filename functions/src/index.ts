@@ -4,6 +4,6 @@ export * from './handlers/hello';
 export * from './handlers/graphql';
 export * from './handlers/geocode';
 
-export * from './schedule/backup';
+export * from './schedule';
 
 export * from './migrates';

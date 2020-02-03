@@ -13,5 +13,8 @@ export const DB_COLLECTION_REAL_PRICE = 'realPrice';
 export const DB_COLLECTION_ITEMS = 'items';
 export const FIRESTORE_BATCH_WRITE_MAX = 500;
 
+// Google Maps
+export const MAPS_GEOCODNG_REQUEST_LIMIT_PER_MONTH = 40000;
+
 // Admin
 export const ADMIN_EMAIL = 'onlyeric23@gmail.com';
