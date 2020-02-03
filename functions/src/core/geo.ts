@@ -17,9 +17,7 @@ export const geocode: (
     .asPromise()
     .then(res => {
       const results = res.json.results;
-      if (results.length > 1) {
-        throw new Error(`More than one result: ${address}`);
-      } else if (results.length === 1) {
+      if (results.length === 1) {
         return results[0];
       }
       return null;

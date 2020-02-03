@@ -19,6 +19,7 @@ const scheduler = async () => {
       .where('lat', '==', null)
       .where('lng', '==', null)
       .where('formatted_address', '==', null)
+      .where('geocoded', '==', false)
       .limit(MAX_REQUEST_COUNT_PER_30_MIN)
       .get()
       .then(snap => snap.docs)
@@ -27,9 +28,18 @@ const scheduler = async () => {
     await Promise.all(
       itemSnaps.map(async snap => {
         const { LOCATION, DISTRICT } = snap.data();
-        return geocode(`台北市 ${DISTRICT} ${LOCATION}`).then(result =>
-          result ? snap.ref.update(flatternGeocodingResult(result)) : null
-        );
+        return geocode(`台北市 ${DISTRICT} ${LOCATION}`).then(result => {
+          let updateData = {
+            geocoded: true,
+          };
+          if (result) {
+            updateData = {
+              ...updateData,
+              ...flatternGeocodingResult(result),
+            };
+          }
+          snap.ref.update(updateData);
+        });
       })
     );
   }

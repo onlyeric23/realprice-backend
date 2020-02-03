@@ -9,14 +9,13 @@ import {
 } from '../core/constant';
 import { getRealPriceDocRef, stringToField } from '../core/db';
 import { firebaseRequestHandler } from '../core/index.js';
-import { IRawTaipei } from '../core/interface.js';
+import { IRawTaipei, IRealPriceItem } from '../core/interface.js';
 import { ADDRESS_TP } from '../core/regex.js';
 import {
   fetchLatestStoredRealPriceDate,
   fetchStoredRealPriceByDate,
   getRealPriceFilename,
 } from '../core/storage.js';
-import { IRealPriceItem } from '../interface.js';
 
 const fetchPriceDocData = async () => {
   const db = admin.firestore();
