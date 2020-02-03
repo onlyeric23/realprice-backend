@@ -73,12 +73,19 @@ const transformByDate = async (date: string) => {
   const rows = stripRealPriceToRows(parsedRealPrice);
   const transformed = rows
     .map((row: any) => {
-      return Object.keys(row).reduce((accu, col) => {
-        const colData = row[col][0].$;
-        const name = Object.keys(colData)[0];
-        const value = colData[name];
-        return { ...accu, [name]: value };
-      }, {});
+      return Object.keys(row).reduce(
+        (accu, col) => {
+          const colData = row[col][0].$;
+          const name = Object.keys(colData)[0];
+          const value = colData[name];
+          return { ...accu, [name]: value };
+        },
+        {
+          formatted_address: null,
+          lat: null,
+          lng: null,
+        }
+      );
     })
     .reduce(
       (accu: IRawTaipei[], regionItem: IRawTaipei) => [
