@@ -7,6 +7,7 @@ import {
   DB_COLLECTION_REAL_PRICE,
   FIRESTORE_BATCH_WRITE_MAX,
 } from '../core/constant';
+import { getRealPriceDocRef, stringToField } from '../core/db';
 import { firebaseRequestHandler } from '../core/index.js';
 import { IRawTaipei } from '../core/interface.js';
 import { ADDRESS_TP } from '../core/regex.js';
@@ -16,7 +17,6 @@ import {
   getRealPriceFilename,
 } from '../core/storage.js';
 import { IRealPriceItem } from '../interface.js';
-import { stringToField } from '../core/db';
 
 const fetchPriceDocData = async () => {
   const db = admin.firestore();
@@ -69,6 +69,13 @@ const expandRawByLocation = (raw: IRawTaipei) => {
 };
 
 const transformByDate = async (date: string) => {
+  const preDocRef = await getRealPriceDocRef({ dateBefore: date });
+  if (preDocRef) {
+    preDocRef
+      .collection(DB_COLLECTION_ITEMS)
+      .get()
+      .then(snaps => snaps.docs.map(doc => doc.data()));
+  }
   const realPrice = await fetchStoredRealPriceByDate(date);
   const parsedRealPrice = await parseStringPromise(realPrice.toString());
   const rows = stripRealPriceToRows(parsedRealPrice);
@@ -104,7 +111,7 @@ const storeTransformed = async (
   const db = admin.firestore();
   const doc = await db.collection(DB_COLLECTION_REAL_PRICE).add({
     name: getRealPriceFilename(date),
-    date,
+    date: new Date(date),
   });
   const collection = doc.collection(DB_COLLECTION_ITEMS);
 

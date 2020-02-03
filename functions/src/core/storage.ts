@@ -1,4 +1,4 @@
-import admin from 'firebase-admin';
+import admin, { firestore } from 'firebase-admin';
 import { Readable } from 'stream';
 import {
   GOV_REAL_PRICE_DATA,
@@ -17,11 +17,16 @@ export const fetchRealPriceFile = () => {
   }).then(readableToString);
 };
 
-export const getRealPriceFilename = (date: Date | string) => {
+export const getRealPriceFilename = (
+  date: Date | string | firestore.Timestamp
+) => {
+  let dateString = date;
   if (date instanceof Date) {
-    return `${RESOURCE_REAL_PRICE_PREFIX}_${date.toISOString()}.${RESOURCE_REAL_PRICE_EXT}`;
+    dateString = date.toISOString();
+  } else if (date instanceof firestore.Timestamp) {
+    dateString = date.toDate().toISOString();
   }
-  return `${RESOURCE_REAL_PRICE_PREFIX}_${date}.${RESOURCE_REAL_PRICE_EXT}`;
+  return `${RESOURCE_REAL_PRICE_PREFIX}_${dateString}.${RESOURCE_REAL_PRICE_EXT}`;
 };
 
 export const getRealPriceBucketPrefix = (date: Date) =>

@@ -5,3 +5,5 @@ export * from './handlers/graphql';
 export * from './handlers/geocode';
 
 export * from './schedule/backup';
+
+export * from './migrates';
