@@ -92,3 +92,16 @@ export const getRealPriceDocRef = async (options?: { dateBefore?: string }) => {
   }
   return latestDocSnap?.ref;
 };
+
+export type FIELD_TYPE = null | string | number;
+
+export const stringToField: (raw: string) => FIELD_TYPE = raw => {
+  if (!raw) {
+    return null;
+  }
+  const num = Number(raw);
+  if (Number.isNaN(num)) {
+    return raw;
+  }
+  return num;
+};

@@ -16,6 +16,7 @@ import {
   getRealPriceFilename,
 } from '../core/storage.js';
 import { IRealPriceItem } from '../interface.js';
+import { stringToField } from '../core/db';
 
 const fetchPriceDocData = async () => {
   const db = admin.firestore();
@@ -77,8 +78,7 @@ const transformByDate = async (date: string) => {
         (accu, col) => {
           const colData = row[col][0].$;
           const name = Object.keys(colData)[0];
-          const value = colData[name];
-          return { ...accu, [name]: value };
+          return { ...accu, [name]: stringToField(colData[name]) };
         },
         {
           formatted_address: null,
