@@ -9,7 +9,7 @@ import {
 } from '../core/constant';
 import { getRealPriceDocRef, stringToField } from '../core/db';
 
-import { IRawTaipei, IRealPriceItem } from '../core/interface.js';
+import { IRealPriceItem } from '../core/interface.js';
 import { ADDRESS_TP } from '../core/regex.js';
 import {
   fetchLatestStoredRealPriceDate,
@@ -55,7 +55,7 @@ const stripRealPriceToRows = (parsedRealPrice: any) => {
   ]);
 };
 
-const expandRawByLocation = (raw: IRawTaipei) => {
+const expandRawByLocation = (raw: IRealPriceItem) => {
   const matched = raw.LOCATION.match(ADDRESS_TP);
   if (!matched) {
     throw Error(`Location not matched: ${inspect(raw)}`);
@@ -73,39 +73,81 @@ const expandRawByLocation = (raw: IRawTaipei) => {
 };
 
 const transformByDate = async (date: string) => {
-  const preDocRef = await getRealPriceDocRef({ dateBefore: date });
-  if (preDocRef) {
-    preDocRef
-      .collection(DB_COLLECTION_ITEMS)
-      .get()
-      .then(snaps => snaps.docs.map(doc => doc.data()));
-  }
+  // Fetch and transform stored RealPrice.xml into Firestore data
   const realPrice = await fetchStoredRealPriceByDate(date);
   const parsedRealPrice = await parseStringPromise(realPrice.toString());
   const rows = stripRealPriceToRows(parsedRealPrice);
-  const transformed = rows
-    .map((row: any) => {
-      return Object.keys(row).reduce(
-        (accu, col) => {
-          const colData = row[col][0].$;
-          const name = Object.keys(colData)[0];
-          return { ...accu, [name]: stringToField(colData[name]) };
-        },
-        {
-          formatted_address: null,
-          lat: null,
-          lng: null,
-        }
-      );
-    })
-    .reduce(
-      (accu: IRawTaipei[], regionItem: IRawTaipei) => [
-        ...accu,
-        ...expandRawByLocation(regionItem),
-      ],
-      []
+  const transformed: IRealPriceItem[] = rows.map((row: any) => {
+    return Object.keys(row).reduce(
+      (accu, col) => {
+        const colData = row[col][0].$;
+        const name = Object.keys(colData)[0];
+        return { ...accu, [name]: stringToField(colData[name]) };
+      },
+      {
+        formatted_address: null,
+        lat: null,
+        lng: null,
+      }
     );
-  return transformed;
+  });
+  // Expand address by it's No..
+  const expanded = transformed.reduce(
+    (accu, regionItem) => [...accu, ...expandRawByLocation(regionItem)],
+    [] as IRealPriceItem[]
+  );
+  const preDocRef = await getRealPriceDocRef({ dateBefore: date });
+  if (preDocRef) {
+    return Promise.all(
+      expanded.map(item =>
+        preDocRef
+          .collection(DB_COLLECTION_ITEMS)
+          .where('CASE_T', '==', item.CASE_T)
+          .where('DISTRICT', '==', item.DISTRICT)
+          .where('CASE_F', '==', item.CASE_F)
+          .where('LOCATION', '==', item.LOCATION)
+          .where('LANDA', '==', item.LANDA)
+          .where('LANDA_Z', '==', item.LANDA_Z)
+          .where('SDATE', '==', item.SDATE)
+          .where('SCNT', '==', item.SCNT)
+          .where('SBUILD', '==', item.SBUILD)
+          .where('TBUILD', '==', item.TBUILD)
+          .where('PBUILD', '==', item.PBUILD)
+          .where('MBUILD', '==', item.MBUILD)
+          .where('FDATE', '==', item.FDATE)
+          .where('FAREA', '==', item.FAREA)
+          .where('BUILD_R', '==', item.BUILD_R)
+          .where('BUILD_L', '==', item.BUILD_L)
+          .where('BUILD_B', '==', item.BUILD_B)
+          .where('BUILD_P', '==', item.BUILD_P)
+          .where('RULE', '==', item.RULE)
+          .where('BUILD_C', '==', item.BUILD_C)
+          .where('TPRICE', '==', item.TPRICE)
+          .where('UPRICE', '==', item.UPRICE)
+          .where('UPNOTE', '==', item.UPNOTE)
+          .where('PARKTYPE', '==', item.PARKTYPE)
+          .where('PAREA', '==', item.PAREA)
+          .where('PPRICE', '==', item.PPRICE)
+          .where('RMNOTE', '==', item.RMNOTE)
+          .get()
+          .then(snap =>
+            snap.docs.length === 1
+              ? (snap.docs[0].data() as IRealPriceItem)
+              : null
+          )
+          .then(preItem => {
+            if (preItem) {
+              item.lat = preItem.lat;
+              item.lng = preItem.lng;
+              item.formatted_address = preItem.formatted_address;
+              item.geocoded = false;
+            }
+            return item;
+          })
+      )
+    );
+  }
+  return expanded;
 };
 
 const storeTransformed = async (
