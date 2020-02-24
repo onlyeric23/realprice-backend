@@ -1,5 +1,5 @@
 import { firebaseScheduler } from '../core';
-import { backupPrice } from '../core/db';
+import { backupPrice } from '../core/storage';
 import { transformPrice } from '../core/transform';
 
 export const backupPriceSchedule = firebaseScheduler(async () => {

@@ -1,5 +1,5 @@
 import { firebaseRequestHandler } from '../core';
-import { backupPrice as backupPriceCore } from '../core/db';
+import { backupPrice as backupPriceCore } from '../core/storage';
 
 export const backupPrice = firebaseRequestHandler(async (_, response) => {
   await backupPriceCore((__, message) => {

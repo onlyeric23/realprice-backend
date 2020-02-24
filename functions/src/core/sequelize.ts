@@ -1,5 +1,6 @@
 import { Sequelize } from 'sequelize-typescript';
 import configs from '../../config/config.json';
+import { Meta } from '../models/Meta.js';
 import { RawItemTP } from '../models/RawItemTP.js';
 
 const config = (process.env.NODE_ENV === 'production'
@@ -8,7 +9,7 @@ const config = (process.env.NODE_ENV === 'production'
   username: string;
   password: string;
   database: string;
-  host: string;
+  host?: string;
   dialect: 'mysql';
   dialectOptions?: any;
 };
@@ -20,6 +21,6 @@ const sequelize = new Sequelize(
   config
 );
 
-sequelize.addModels([RawItemTP]);
+sequelize.addModels([RawItemTP, Meta]);
 
 export default sequelize;

@@ -5,14 +5,56 @@ import {
   CreatedAt,
   DeletedAt,
   Model,
+  NotNull,
+  PrimaryKey,
   Table,
   UpdatedAt,
 } from 'sequelize-typescript';
+import { generateChecksum } from '../core/utils';
 
 @Table({
   tableName: 'raw_item_tp',
 })
 export class RawItemTP extends Model<RawItemTP> {
+  static generateId(raw: any) {
+    return generateChecksum(
+      [
+        raw.BUILD_B,
+        raw.BUILD_C,
+        raw.BUILD_L,
+        raw.BUILD_P,
+        raw.BUILD_R,
+        raw.BUITYPE,
+        raw.CASE_F,
+        raw.CASE_T,
+        raw.DISTRICT,
+        raw.FAREA,
+        raw.FDATE,
+        raw.RULE,
+        raw.LOCATION,
+        raw.LANDA,
+        raw.LANDA_Z,
+        raw.SDATE,
+        raw.SCNT,
+        raw.SBUILD,
+        raw.TBUILD,
+        raw.PBUILD,
+        raw.MBUILD,
+        raw.TPRICE,
+        raw.UPRICE,
+        raw.UPNOTE,
+        raw.PARKTYPE,
+        raw.PAREA,
+        raw.PPRICE,
+        raw.RMNOTE,
+      ].join('')
+    );
+  }
+
+  @PrimaryKey
+  @Column
+  id: string;
+
   @CreatedAt
   createdAt: Date;
 
