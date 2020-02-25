@@ -2,6 +2,7 @@ const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
   entry: './src/index.ts',
+  devtool: process.env.NODE_ENV === 'production' ? null : 'cheap-source-map',
   output: {
     filename: 'index.js',
     libraryTarget: 'this',
@@ -21,7 +22,7 @@ module.exports = {
           },
         ],
       },
-      { test: /\.ts?$/, loader: 'ts-loader', exclude: /node_modules/ },
+      { test: /\.ts$/, loader: 'ts-loader', exclude: /node_modules/ },
     ],
   },
 };
