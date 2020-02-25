@@ -63,7 +63,3 @@ node_modules/
 
 # dotenv environment variables file
 .env
-
-# sensitive files
-config.json
-lib/

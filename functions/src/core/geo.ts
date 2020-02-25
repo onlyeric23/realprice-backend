@@ -1,6 +1,6 @@
 import map from '@google/maps';
 
-import { GOOGLE_MAPS_API_KEY } from '../config.json';
+import { GOOGLE_MAPS_API_KEY } from '../../config/config.json';
 
 export const geocode: (
   address: string

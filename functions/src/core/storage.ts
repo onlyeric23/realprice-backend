@@ -1,5 +1,5 @@
 import admin, { firestore } from 'firebase-admin';
-import { Readable } from 'stream';
+import { Readable, Writable } from 'stream';
 import {
   GOV_REAL_PRICE_DATA,
   RESOURCE_REAL_PRICE_EXT,
@@ -9,7 +9,7 @@ import {
 import { ISO8601 } from '../core/regex';
 
 import https from 'https';
-import { readableToString } from './utils';
+import { generateChecksum, readableToString } from './utils';
 
 export const fetchRealPriceFile = () => {
   return new Promise<Readable>(resolve => {
@@ -83,4 +83,60 @@ export const fetchLatestStoredRealPrice = () => {
   return fetchLatestStoredRealPriceDate().then(date => {
     return date ? fetchStoredRealPriceByDate(date) : null;
   });
+};
+
+const writeStreamProm = (chunk: any, stream: Writable) =>
+  new Promise((resolve, reject) => {
+    stream.on('error', reject);
+    stream.end(chunk, resolve);
+  });
+
+export enum BackupResult {
+  ALREADY_EXIST,
+  BACKUP_NEW_FILE,
+}
+
+export const backupPrice = async (
+  onSuccess?: (result: BackupResult, message: string) => void
+) => {
+  // Fetch the latest stored file and the current file.
+  const [price, latestStoredPrice] = await Promise.all([
+    fetchRealPriceFile(),
+    fetchLatestStoredRealPrice(),
+  ]);
+  const currentChecksum = generateChecksum(price!);
+  const latestChecksum = latestStoredPrice
+    ? generateChecksum(latestStoredPrice)
+    : null;
+
+  // Compare the latest stored file and the current file.
+  // If they are the same, it is already up-to-date.
+  // Otherwise, store the current file to Storage.
+  if (currentChecksum === latestChecksum) {
+    const message = 'Already up-to-date.';
+    console.info(message);
+    if (onSuccess) {
+      onSuccess(BackupResult.ALREADY_EXIST, message);
+    }
+  } else {
+    const backupName = getRealPriceBucketPrefix(new Date());
+    const bucket = admin.storage().bucket();
+    const file = bucket.file(backupName);
+    const stream = file.createWriteStream();
+    await writeStreamProm(price, stream)
+      .then(() =>
+        file.setMetadata({
+          contentType: 'text/xml',
+        })
+      )
+      .catch(error => {
+        console.warn(error);
+        return file.delete();
+      });
+    const message = `Backup new file ${backupName}`;
+    console.info(message);
+    if (onSuccess) {
+      onSuccess(BackupResult.BACKUP_NEW_FILE, message);
+    }
+  }
 };

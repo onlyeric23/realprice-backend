@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { Readable } from 'stream';
+import { ADDRESS_TP } from './regex';
 
 export function generateChecksum(
   data: string | Buffer | DataView,
@@ -25,4 +26,20 @@ export const readableToString = (readable: Readable) => {
       resolve(chunks);
     });
   });
+};
+
+export const extendAddress = (originalAddress: string) => {
+  const matched = originalAddress.match(ADDRESS_TP);
+  if (!matched) {
+    throw Error(`Location not matched: ${originalAddress}`);
+  }
+  const [_, range, from, to] = matched;
+  if (!range || !from || !to) {
+    throw Error(`Location not matched: ${originalAddress}`);
+  }
+  return Array(parseInt(to) - parseInt(from) + 1)
+    .fill(0)
+    .map((__, index) =>
+      originalAddress.replace(range, String(parseInt(to) + index))
+    );
 };

@@ -1,5 +1,6 @@
 import { firebaseRequestHandler } from '../core';
 import { notifyException } from '../core/mail';
+import { RawItemTP } from '../models/RawItemTP';
 
 export const helloMail = firebaseRequestHandler(async (_, response) => {
   await notifyException({
@@ -11,4 +12,9 @@ export const helloMail = firebaseRequestHandler(async (_, response) => {
 
 export const helloError = firebaseRequestHandler(() => {
   throw new Error('I am an error.');
+});
+
+export const helloSQL = firebaseRequestHandler(async (_, res) => {
+  const count = await RawItemTP.count();
+  res.send(`Current count: ${count}`).end();
 });
