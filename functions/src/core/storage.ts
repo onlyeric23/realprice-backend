@@ -9,7 +9,7 @@ import {
 import { ISO8601 } from '../core/regex';
 
 import https from 'https';
-import { readableToString, generateChecksum } from './utils';
+import { generateChecksum, readableToString } from './utils';
 
 export const fetchRealPriceFile = () => {
   return new Promise<Readable>(resolve => {

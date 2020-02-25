@@ -1,9 +1,10 @@
 {
-  "name": "functions",
+  "name": "realprice-backedn",
   "scripts": {
     "lint": "tslint --fix --project tsconfig.json",
-    "build": "tsc",
-    "serve": "tsc -w | firebase serve --only functions",
+    "build": "webpack --mode production",
+    "watch": "webpack --mode development --watch",
+    "serve": "npm run watch | firebase serve --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
@@ -12,7 +13,7 @@
   "engines": {
     "node": "8"
   },
-  "main": "lib/src/index.js",
+  "main": "dist/index.js",
   "dependencies": {
     "@google/maps": "^1.0.2",
     "@sendgrid/mail": "^6.4.0",
@@ -29,18 +30,24 @@
     "xml2js": "^0.4.23"
   },
   "devDependencies": {
-    "@types/xml2js": "^0.4.5",
     "@types/bluebird": "^3.5.29",
     "@types/google__maps": "^0.5.10",
     "@types/node": "^8",
     "@types/validator": "^12.0.1",
+    "@types/xml2js": "^0.4.5",
+    "file-loader": "^5.1.0",
     "firebase-functions-test": "^0.1.6",
     "prettier": "1.19.1",
+    "raw-loader": "^4.0.0",
     "sequelize-cli": "^5.5.1",
+    "ts-loader": "^6.2.1",
     "tslint": "^5.12.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.1.0",
-    "typescript": "^3.2.2"
+    "typescript": "^3.2.2",
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11",
+    "webpack-node-externals": "^1.7.2"
   },
   "private": true
 }

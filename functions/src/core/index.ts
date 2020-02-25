@@ -1,9 +1,9 @@
 import admin, { ServiceAccount } from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import { inspect } from 'util';
-import { FIREBASE_ADMINSDK } from '../config.json';
-import { CLOUD_STORAGE_BUCKET } from './constant.js';
-import { notifyException } from './mail.js';
+import { FIREBASE_ADMINSDK } from '../../config/config.json';
+import { CLOUD_STORAGE_BUCKET } from './constant';
+import { notifyException } from './mail';
 
 admin.initializeApp({
   credential: admin.credential.cert(FIREBASE_ADMINSDK as ServiceAccount),
