@@ -4,7 +4,7 @@ import { Op } from 'sequelize';
 import { geocodeRawItemTP } from '../core/geo';
 import { RawItemTP } from '../models/RawItemTP';
 
-const CRONTAB = '30 * * * *';
+const CRONTAB = '0,30 * * * *';
 
 const scheduler = async () => {
   const items = await RawItemTP.findAll({
