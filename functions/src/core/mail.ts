@@ -1,6 +1,6 @@
 import sgMail from '@sendgrid/mail';
 import { inspect } from 'util';
-import { SENDGRID_API_KEY } from '../../config/config.json';
+import { SENDGRID_API_KEY } from '../../config/config';
 import { ADMIN_EMAIL } from './constant';
 
 export const notifyException = ({

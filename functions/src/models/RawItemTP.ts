@@ -1,22 +1,25 @@
 /* tslint:disable:variable-name */
 
 import {
+  AllowNull,
+  BelongsToMany,
   Column,
   CreatedAt,
   DeletedAt,
   Model,
-  NotNull,
-  PrimaryKey,
   Table,
+  Unique,
   UpdatedAt,
 } from 'sequelize-typescript';
 import { generateChecksum } from '../core/utils';
+import { LocationAssociation } from './LocationAssociation';
+import { RawLocation } from './RawLocation';
 
 @Table({
   tableName: 'raw_item_tp',
 })
 export class RawItemTP extends Model<RawItemTP> {
-  static generateId(raw: any) {
+  static generateHash(raw: any) {
     return generateChecksum(
       [
         raw.BUILD_B,
@@ -51,9 +54,18 @@ export class RawItemTP extends Model<RawItemTP> {
     );
   }
 
-  @PrimaryKey
+  @AllowNull(false)
+  @Unique
   @Column
-  id: string;
+  hash: string;
+
+  @BelongsToMany(
+    () => RawLocation,
+    () => LocationAssociation
+  )
+  raw_locations: Array<
+    RawLocation & { LocationAssociation: LocationAssociation }
+  >;
 
   @CreatedAt
   createdAt: Date;
@@ -63,15 +75,6 @@ export class RawItemTP extends Model<RawItemTP> {
 
   @DeletedAt
   deletedAt: Date;
-
-  @Column
-  lat: number;
-
-  @Column
-  lng: number;
-
-  @Column
-  formatted_address: string;
 
   @Column
   geocodedAt: Date;

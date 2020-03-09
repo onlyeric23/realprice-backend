@@ -1,6 +1,12 @@
 import map from '@google/maps';
 
-import { GOOGLE_MAPS_API_KEY } from '../../config/config.json';
+import { Sequelize } from 'sequelize';
+import { GOOGLE_MAPS_API_KEY } from '../../config/config';
+import { Geo } from '../models/Geo';
+import { LocationAssociation } from '../models/LocationAssociation';
+import { RawItemTP } from '../models/RawItemTP';
+import { RawLocation } from '../models/RawLocation';
+import { extendAddress } from './utils';
 
 export const geocode: (
   address: string
@@ -24,12 +30,54 @@ export const geocode: (
     });
 };
 
-export const flatternGeocodingResult: (
-  result: map.GeocodingResult
-) => { formatted_address: string; lat: number; lng: number } = result => {
+export const flatternGeocodingResult = (result: map.GeocodingResult) => {
   return {
     formatted_address: result.formatted_address,
-    lat: result.geometry.location.lat,
-    lng: result.geometry.location.lng,
+    latitude: result.geometry.location.lat,
+    longitude: result.geometry.location.lng,
+    place_id: result.place_id,
   };
+};
+
+export const geocodeRawItemTP = async (item: RawItemTP) => {
+  await Promise.all(
+    extendAddress(item.LOCATION).map(async location => {
+      const isExists = Boolean(
+        await RawLocation.findOne({
+          where: {
+            location,
+          },
+        })
+      );
+      if (!isExists) {
+        const geocoded = await geocode(location);
+        if (geocoded) {
+          const geo = await Geo.create(flatternGeocodingResult(geocoded));
+          const rawLocation = await RawLocation.create({
+            location,
+            geo_id: geo.id,
+          });
+          await LocationAssociation.create({
+            raw_item_tp_id: item.id,
+            location_id: rawLocation.id,
+          });
+        }
+      }
+    })
+  );
+
+  const updatedItem = (await RawItemTP.findOne({
+    where: {
+      id: item.id,
+    },
+    include: [RawLocation],
+  }))!;
+
+  if (
+    updatedItem.raw_locations.length === extendAddress(item.LOCATION).length
+  ) {
+    await item.update({
+      geocodedAt: Sequelize.literal('CURRENT_TIMESTAMP'),
+    });
+  }
 };

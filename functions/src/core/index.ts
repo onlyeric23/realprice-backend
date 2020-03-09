@@ -1,7 +1,7 @@
 import admin, { ServiceAccount } from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import { inspect } from 'util';
-import { FIREBASE_ADMINSDK } from '../../config/config.json';
+import { FIREBASE_ADMINSDK } from '../../config/config';
 import { CLOUD_STORAGE_BUCKET } from './constant';
 import { notifyException } from './mail';
 

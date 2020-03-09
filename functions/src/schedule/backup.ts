@@ -5,4 +5,4 @@ import { transformPrice } from '../core/transform';
 export const backupPriceSchedule = firebaseScheduler(async () => {
   await backupPrice();
   await transformPrice();
-}, '0 1 * * 4');
+}, '0 1 * * *');

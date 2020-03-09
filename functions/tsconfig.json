@@ -9,7 +9,9 @@
     "lib": ["ESNext"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    "noImplicitAny": false,
+    "allowJs": true
   },
   "compileOnSave": true,
   "include": ["src"],

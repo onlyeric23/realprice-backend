@@ -9,5 +9,9 @@
     "no-submodule-imports": [true, "lodash"],
     "no-implicit-dependencies": false,
     "member-access": false
+  },
+  "jsRules": {
+    "object-literal-sort-keys": false,
+    "no-console": false
   }
 }

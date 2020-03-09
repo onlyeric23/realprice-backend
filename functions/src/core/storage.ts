@@ -92,19 +92,28 @@ const writeStreamProm = (chunk: any, stream: Writable) =>
   });
 
 export enum BackupResult {
+  UNAVAILABLE,
   ALREADY_EXIST,
   BACKUP_NEW_FILE,
 }
 
 export const backupPrice = async (
-  onSuccess?: (result: BackupResult, message: string) => void
+  onSuccess?: (result: BackupResult, message: string, status?: number) => void
 ) => {
   // Fetch the latest stored file and the current file.
   const [price, latestStoredPrice] = await Promise.all([
     fetchRealPriceFile(),
     fetchLatestStoredRealPrice(),
   ]);
-  const currentChecksum = generateChecksum(price!);
+  if (!price) {
+    const message = 'RealPrice.xml from OpenData is unavailable.';
+    console.warn(message);
+    if (onSuccess) {
+      onSuccess(BackupResult.UNAVAILABLE, message, 400);
+    }
+    return;
+  }
+  const currentChecksum = generateChecksum(price);
   const latestChecksum = latestStoredPrice
     ? generateChecksum(latestStoredPrice)
     : null;
