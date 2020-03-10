@@ -12,17 +12,14 @@ import {
 import { RawItemTP } from './RawItemTP';
 import { RawLocation } from './RawLocation';
 
-@Table({
-  tableName: 'location_association',
-})
 export class LocationAssociation extends Model<LocationAssociation> {
   @ForeignKey(() => RawLocation)
   @Column
-  location_id: number;
+  locationId: number;
 
   @ForeignKey(() => RawItemTP)
   @Column
-  raw_item_tp_id: number;
+  rawItemTPId: number;
 
   @Column
   @CreatedAt

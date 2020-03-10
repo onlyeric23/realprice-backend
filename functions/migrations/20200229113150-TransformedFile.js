@@ -1,6 +1,6 @@
 'use strict';
 
-const TABLE = 'transformed_file';
+const TABLE = 'TransformedFile';
 
 module.exports = {
   up: (queryInterface, Sequelize) => {

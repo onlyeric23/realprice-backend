@@ -32,10 +32,10 @@ export const geocode: (
 
 export const flatternGeocodingResult = (result: map.GeocodingResult) => {
   return {
-    formatted_address: result.formatted_address,
+    formattedAddress: result.formatted_address,
     latitude: result.geometry.location.lat,
     longitude: result.geometry.location.lng,
-    place_id: result.place_id,
+    placeId: result.place_id,
   };
 };
 
@@ -55,11 +55,11 @@ export const geocodeRawItemTP = async (item: RawItemTP) => {
           const geo = await Geo.create(flatternGeocodingResult(geocoded));
           const rawLocation = await RawLocation.create({
             location,
-            geo_id: geo.id,
+            geoId: geo.id,
           });
           await LocationAssociation.create({
-            raw_item_tp_id: item.id,
-            location_id: rawLocation.id,
+            rawItemTPId: item.id,
+            locationId: rawLocation.id,
           });
         }
       }
@@ -74,7 +74,7 @@ export const geocodeRawItemTP = async (item: RawItemTP) => {
   }))!;
 
   if (
-    updatedItem.raw_locations.length === extendAddress(item.LOCATION).length
+    updatedItem.locations.length === extendAddress(item.LOCATION).length
   ) {
     await item.update({
       geocodedAt: Sequelize.literal('CURRENT_TIMESTAMP'),

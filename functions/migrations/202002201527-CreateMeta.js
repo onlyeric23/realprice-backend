@@ -1,6 +1,6 @@
 'use strict';
 
-const TABLE = 'meta';
+const TABLE = 'Meta';
 
 module.TABLE = TABLE;
 

@@ -15,9 +15,6 @@ import { generateChecksum } from '../core/utils';
 import { LocationAssociation } from './LocationAssociation';
 import { RawLocation } from './RawLocation';
 
-@Table({
-  tableName: 'raw_item_tp',
-})
 export class RawItemTP extends Model<RawItemTP> {
   static generateHash(raw: any) {
     return generateChecksum(
@@ -63,9 +60,10 @@ export class RawItemTP extends Model<RawItemTP> {
     () => RawLocation,
     () => LocationAssociation
   )
-  raw_locations: Array<
-    RawLocation & { LocationAssociation: LocationAssociation }
-  >;
+  locations: Array<RawLocation & { LocationAssociation: LocationAssociation }>;
+
+  @Column
+  soldDate: Date;
 
   @CreatedAt
   createdAt: Date;

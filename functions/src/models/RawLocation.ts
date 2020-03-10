@@ -17,9 +17,6 @@ import { Geo } from './Geo';
 import { LocationAssociation } from './LocationAssociation';
 import { RawItemTP } from './RawItemTP';
 
-@Table({
-  tableName: 'raw_location',
-})
 export class RawLocation extends Model<RawLocation> {
   @AllowNull(false)
   @Unique
@@ -37,7 +34,7 @@ export class RawLocation extends Model<RawLocation> {
 
   @ForeignKey(() => Geo)
   @Column
-  geo_id: number;
+  geoId: number;
 
   @BelongsTo(() => Geo)
   geo: Geo;
@@ -46,5 +43,5 @@ export class RawLocation extends Model<RawLocation> {
     () => RawItemTP,
     () => LocationAssociation
   )
-  raw_item_tps: Array<RawItemTP & { LocationAssociation: LocationAssociation }>;
+  rawItemTPs: Array<RawItemTP & { LocationAssociation: LocationAssociation }>;
 }

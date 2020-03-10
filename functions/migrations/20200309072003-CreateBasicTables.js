@@ -1,9 +1,9 @@
 'use strict';
 
-const TABLE_RAW_ITEM_TP = 'raw_item_tp';
-const TABLE_RAW_LOCATION = 'raw_location';
-const TABLE_LOCATION_ASSOCIATION = 'location_association';
-const TABLE_GEO = 'geo';
+const TABLE_RAW_ITEM_TP = 'RawItemTP';
+const TABLE_RAW_LOCATION = 'RawLocation';
+const TABLE_LOCATION_ASSOCIATION = 'LocationAssociation';
+const TABLE_GEO = 'Geo';
 
 const createRawItemTP = (queryInterface, Sequelize) => {
   return queryInterface.createTable(TABLE_RAW_ITEM_TP, {
@@ -30,19 +30,12 @@ const createRawItemTP = (queryInterface, Sequelize) => {
       allowNull: false,
       unique: true,
     },
-    lat: {
-      type: Sequelize.DECIMAL,
-    },
-    lng: {
-      type: Sequelize.DECIMAL,
-    },
-    formatted_address: {
-      type: Sequelize.STRING,
+    soldDate: {
+      type: Sequelize.DATE,
     },
     geocodedAt: {
       type: Sequelize.DATE,
     },
-
     BUILD_B: {
       type: Sequelize.STRING,
     },
@@ -155,10 +148,10 @@ const createRawLocation = (queryInterface, Sequelize) => {
       unique: true,
       allowNull: false,
     },
-    geo_id: {
+    geoId: {
       type: Sequelize.INTEGER,
       references: {
-        model: 'geo',
+        model: 'Geo',
         key: 'id',
       },
       onUpdate: 'cascade',
@@ -187,19 +180,19 @@ const createLocationAssociation = (queryInterface, Sequelize) => {
     deletedAt: {
       type: Sequelize.DATE,
     },
-    location_id: {
+    locationId: {
       type: Sequelize.INTEGER,
       references: {
-        model: 'raw_location',
+        model: 'RawLocation',
         key: 'id',
       },
       onUpdate: 'cascade',
       onDelete: 'cascade',
     },
-    raw_item_tp_id: {
+    rawItemTPId: {
       type: Sequelize.INTEGER,
       references: {
-        model: 'raw_item_tp',
+        model: 'RawItemTP',
         key: 'id',
       },
       onUpdate: 'cascade',
@@ -216,13 +209,13 @@ const createGeo = (queryInterface, Sequelize) => {
       primaryKey: true,
       autoIncrement: true,
     },
-    formatted_address: {
+    formattedAddress: {
       type: Sequelize.STRING,
       unique: true,
     },
     latitude: Sequelize.DataTypes.DECIMAL(9, 6),
     longitude: Sequelize.DataTypes.DECIMAL(9, 6),
-    place_id: {
+    placeId: {
       type: Sequelize.STRING,
       unique: true,
     },

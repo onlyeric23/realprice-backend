@@ -10,9 +10,6 @@ import {
   UpdatedAt,
 } from 'sequelize-typescript';
 
-@Table({
-  tableName: 'meta',
-})
 export class Meta extends Model<Meta> {
   @PrimaryKey
   @Column
