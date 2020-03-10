@@ -11,6 +11,9 @@ import {
   UpdatedAt,
 } from 'sequelize-typescript';
 
+@Table({
+  tableName: 'TransformedFile',
+})
 export class TransformedFile extends Model<TransformedFile> {
   @AllowNull(false)
   @Unique

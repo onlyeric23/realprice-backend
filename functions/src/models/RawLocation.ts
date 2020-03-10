@@ -16,7 +16,9 @@ import {
 import { Geo } from './Geo';
 import { LocationAssociation } from './LocationAssociation';
 import { RawItemTP } from './RawItemTP';
-
+@Table({
+  tableName: 'RawLocation',
+})
 export class RawLocation extends Model<RawLocation> {
   @AllowNull(false)
   @Unique

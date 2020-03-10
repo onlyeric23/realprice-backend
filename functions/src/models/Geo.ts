@@ -13,6 +13,9 @@ import {
 } from 'sequelize-typescript';
 import { RawLocation } from './RawLocation';
 
+@Table({
+  tableName: 'Geo',
+})
 export class Geo extends Model<Geo> {
   @Unique
   @Column

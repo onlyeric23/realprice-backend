@@ -1,5 +1,7 @@
 /* tslint:disable:variable-name */
 
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 import {
   AllowNull,
   BelongsToMany,
@@ -14,10 +16,11 @@ import {
 import { generateChecksum } from '../core/utils';
 import { LocationAssociation } from './LocationAssociation';
 import { RawLocation } from './RawLocation';
-import dayjs from 'dayjs';
-import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat);
 
+@Table({
+  tableName: 'RawItemTP',
+})
 export class RawItemTP extends Model<RawItemTP> {
   static generateHash(raw: any) {
     return generateChecksum(

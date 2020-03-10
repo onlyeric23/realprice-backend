@@ -73,9 +73,7 @@ export const geocodeRawItemTP = async (item: RawItemTP) => {
     include: [RawLocation],
   }))!;
 
-  if (
-    updatedItem.locations.length === extendAddress(item.LOCATION).length
-  ) {
+  if (updatedItem.locations.length === extendAddress(item.LOCATION).length) {
     await item.update({
       geocodedAt: Sequelize.literal('CURRENT_TIMESTAMP'),
     });

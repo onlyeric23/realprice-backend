@@ -12,6 +12,9 @@ import {
 import { RawItemTP } from './RawItemTP';
 import { RawLocation } from './RawLocation';
 
+@Table({
+  tableName: 'LocationAssociation',
+})
 export class LocationAssociation extends Model<LocationAssociation> {
   @ForeignKey(() => RawLocation)
   @Column
