@@ -42,7 +42,11 @@ const transformByDate = async (date: string | Date) => {
         return { ...accu, [colName]: colData[colName] };
       }, {});
     })
-    .map((item: any) => ({ ...item, hash: RawItemTP.generateHash(item) }));
+    .map((item: any) => ({
+      ...item,
+      hash: RawItemTP.generateHash(item),
+      soldDate: RawItemTP.getDateBySDATE(item.SDATE),
+    }));
   return RawItemTP.bulkCreate(transformed, { ignoreDuplicates: true });
 };
 

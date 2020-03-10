@@ -14,6 +14,9 @@ import {
 import { generateChecksum } from '../core/utils';
 import { LocationAssociation } from './LocationAssociation';
 import { RawLocation } from './RawLocation';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(customParseFormat);
 
 export class RawItemTP extends Model<RawItemTP> {
   static generateHash(raw: any) {
@@ -49,6 +52,13 @@ export class RawItemTP extends Model<RawItemTP> {
         raw.RMNOTE,
       ].join('')
     );
+  }
+
+  static getDateBySDATE(SDATE: string) {
+    const day = SDATE.slice(-2);
+    const mon = SDATE.slice(-4, -2);
+    const year = parseInt(SDATE.slice(0, -4)) + 1911;
+    return dayjs(`${year}-${mon}-${day} +08:00`, 'YYYY-MM-DD Z').toDate();
   }
 
   @AllowNull(false)

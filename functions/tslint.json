@@ -6,7 +6,7 @@
     "object-literal-sort-keys": false,
     "no-console": false,
     "radix": false,
-    "no-submodule-imports": [true, "lodash"],
+    "no-submodule-imports": [true, "lodash", "dayjs"],
     "no-implicit-dependencies": false,
     "member-access": false
   },
