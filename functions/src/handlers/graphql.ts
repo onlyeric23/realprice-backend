@@ -51,4 +51,6 @@ const server = new ApolloServer({
   introspection: true,
 });
 
-export const query = functions.https.onRequest(server.createHandler());
+export const query = functions
+  .region('asia-east2')
+  .https.onRequest(server.createHandler());
