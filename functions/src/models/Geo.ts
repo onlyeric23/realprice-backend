@@ -27,10 +27,6 @@ export class Geo extends Model<Geo> {
   @Column({ type: DataType.DECIMAL(9, 6) })
   longitude: number;
 
-  @Unique
-  @Column
-  placeId: string;
-
   @Column
   @CreatedAt
   createdAt: Date;

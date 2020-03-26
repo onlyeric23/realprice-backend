@@ -38,7 +38,7 @@ export type Handler = (
 ) => void | Promise<void>;
 
 export const firebaseRequestHandler = (handler: Handler) =>
-  functions.https.onRequest(async (request, response) => {
+  functions.region('asia-east2').https.onRequest(async (request, response) => {
     try {
       await handler(request, response);
     } catch (error) {
@@ -54,8 +54,9 @@ export const firebaseScheduler = (
   schedule: string,
   timezone: string = 'Asia/Taipei'
 ) =>
-  functions.pubsub
-    .schedule(schedule)
+  functions
+    .region('asia-east2')
+    .pubsub.schedule(schedule)
     .timeZone(timezone)
     .onRun(async context => {
       try {

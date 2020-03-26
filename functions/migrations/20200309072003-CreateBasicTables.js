@@ -33,9 +33,6 @@ const createRawItemTP = (queryInterface, Sequelize) => {
     soldDate: {
       type: Sequelize.DATE,
     },
-    geocodedAt: {
-      type: Sequelize.DATE,
-    },
     BUILD_B: {
       type: Sequelize.STRING,
     },
@@ -143,6 +140,9 @@ const createRawLocation = (queryInterface, Sequelize) => {
     deletedAt: {
       type: Sequelize.DATE,
     },
+    geocodedAt: {
+      type: Sequelize.DATE,
+    },
     location: {
       type: Sequelize.STRING,
       unique: true,
@@ -215,10 +215,6 @@ const createGeo = (queryInterface, Sequelize) => {
     },
     latitude: Sequelize.DataTypes.DECIMAL(9, 6),
     longitude: Sequelize.DataTypes.DECIMAL(9, 6),
-    placeId: {
-      type: Sequelize.STRING,
-      unique: true,
-    },
     createdAt: {
       type: Sequelize.DATE,
       defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),

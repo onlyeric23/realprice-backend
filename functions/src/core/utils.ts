@@ -40,6 +40,6 @@ export const extendAddress = (originalAddress: string) => {
   return Array(parseInt(to) - parseInt(from) + 1)
     .fill(0)
     .map((__, index) =>
-      originalAddress.replace(range, String(parseInt(to) + index))
+      originalAddress.replace(range, String(parseInt(from) + index))
     );
 };

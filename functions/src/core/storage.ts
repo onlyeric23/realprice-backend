@@ -62,6 +62,17 @@ export const fetchStoredRealPriceDates = () => {
     });
 };
 
+export const fetchStoredRealPrices = () => {
+  const bucket = admin.storage().bucket();
+  return bucket
+    .getFiles({
+      prefix: `${STORAGE_RESOURCES}/${RESOURCE_REAL_PRICE_PREFIX}_`,
+    })
+    .then(([files]) => files)
+    .then(files => Promise.all(files.map(file => file.download())))
+    .then(responses => responses.map(res => res[0]));
+};
+
 export const fetchStoredRealPriceByDate = (date: Date | string) => {
   const bucket = admin.storage().bucket();
   return bucket

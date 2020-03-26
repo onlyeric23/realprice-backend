@@ -22,6 +22,9 @@ dayjs.extend(customParseFormat);
   tableName: 'RawItemTP',
 })
 export class RawItemTP extends Model<RawItemTP> {
+  static readonly TYPE_CADASTRAL = 'TYPE_CADASTRAL';
+  static readonly TYPE_ADDRESS = 'TYPE_ADDRESS';
+
   static generateHash(raw: any) {
     return generateChecksum(
       [
@@ -86,9 +89,6 @@ export class RawItemTP extends Model<RawItemTP> {
 
   @DeletedAt
   deletedAt: Date;
-
-  @Column
-  geocodedAt: Date;
 
   // 建物現況格局_衛
   @Column
@@ -201,4 +201,11 @@ export class RawItemTP extends Model<RawItemTP> {
   // 備註
   @Column
   RMNOTE: string;
+
+  getType() {
+    if (this.LOCATION.includes('地號')) {
+      return RawItemTP.TYPE_CADASTRAL;
+    }
+    return RawItemTP.TYPE_ADDRESS;
+  }
 }

@@ -1,21 +1,21 @@
-import { firebaseScheduler } from '../core';
-
 import { Op } from 'sequelize';
-import { geocodeRawItemTP } from '../core/geo';
-import { RawItemTP } from '../models/RawItemTP';
+
+import { firebaseScheduler } from '../core';
+import { geocodeAddress } from '../core/geo';
+import { RawLocation } from '../models/RawLocation';
 
 const CRONTAB = '0,30 * * * *';
 
 const scheduler = async () => {
-  const items = await RawItemTP.findAll({
+  const rawLocations = await RawLocation.findAll({
     where: {
       geocodedAt: {
         [Op.eq]: null,
       },
     },
-    limit: 2,
+    limit: 25,
   });
-  await items.map(geocodeRawItemTP);
+  await rawLocations.map(geocodeAddress);
 };
 
 export const geocodingSchedule = firebaseScheduler(scheduler, CRONTAB);

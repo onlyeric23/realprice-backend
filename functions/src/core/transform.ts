@@ -1,6 +1,7 @@
 import get from 'lodash/get';
 import { parseStringPromise } from 'xml2js';
 import { RawItemTP } from '../models/RawItemTP';
+import { RawLocation } from '../models/RawLocation';
 import { TransformedFile } from '../models/TransformedFile';
 import {
   fetchLatestStoredRealPriceDate,
@@ -8,6 +9,7 @@ import {
   fetchStoredRealPriceDates,
   getRealPriceFilename,
 } from './storage';
+import { extendAddress } from './utils';
 
 export enum TransformResult {
   NO_AVAILABLE_FILE,
@@ -15,7 +17,7 @@ export enum TransformResult {
   TRANSFORM_NEW_FILE,
 }
 
-const stripRealPriceToRows = (parsedRealPrice: any) => {
+export const stripRealPriceToRows = (parsedRealPrice: any) => {
   return get(parsedRealPrice, [
     'soap:Envelope',
     'soap:Body',
@@ -30,9 +32,8 @@ const stripRealPriceToRows = (parsedRealPrice: any) => {
   ]);
 };
 
-const transformByDate = async (date: string | Date) => {
-  const realprice = await fetchStoredRealPriceByDate(date);
-  const parsedRealPrice = await parseStringPromise(realprice!.toString());
+export const transformBufferedFile = async (buffer: Buffer) => {
+  const parsedRealPrice = await parseStringPromise(buffer.toString());
   const rows = stripRealPriceToRows(parsedRealPrice);
   const transformed = rows
     .map((row: any) => {
@@ -47,7 +48,7 @@ const transformByDate = async (date: string | Date) => {
       hash: RawItemTP.generateHash(item),
       soldDate: RawItemTP.getDateBySDATE(item.SDATE),
     }));
-  return RawItemTP.bulkCreate(transformed, { ignoreDuplicates: true });
+  return transformed;
 };
 
 export const transformPrice = async (
@@ -75,10 +76,15 @@ export const transformPrice = async (
         },
       });
       if (!file) {
-        const items = await transformByDate(date);
+        const buffer = await fetchStoredRealPriceByDate(date);
+        const transformeds = await transformBufferedFile(buffer);
+        const rawItems = await RawItemTP.bulkCreate(transformeds, {
+          ignoreDuplicates: true,
+        });
+        await Promise.all(rawItems.map(addRawLocationByRawItemTp));
         transformedFiles.push({
           name,
-          num_entries: items.length,
+          num_entries: transformeds.length,
         });
       }
     })
@@ -100,4 +106,15 @@ export const transformPrice = async (
       onSuccess(TransformResult.TRANSFORM_NEW_FILE, message);
     }
   }
+};
+
+const addRawLocationByRawItemTp = (rawItem: RawItemTP) => {
+  return RawLocation.bulkCreate(
+    extendAddress(rawItem.LOCATION).map(location => ({
+      location,
+    })),
+    {
+      ignoreDuplicates: true,
+    }
+  );
 };

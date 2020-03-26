@@ -20,7 +20,6 @@ import { RawItemTP } from './RawItemTP';
   tableName: 'RawLocation',
 })
 export class RawLocation extends Model<RawLocation> {
-  @AllowNull(false)
   @Unique
   @Column
   location: string;
@@ -33,6 +32,9 @@ export class RawLocation extends Model<RawLocation> {
 
   @DeletedAt
   deletedAt: Date;
+
+  @Column
+  geocodedAt: Date;
 
   @ForeignKey(() => Geo)
   @Column

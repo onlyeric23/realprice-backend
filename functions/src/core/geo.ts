@@ -19,6 +19,7 @@ export const geocode: (
   return client
     .geocode({
       address,
+      language: 'zh-TW',
     })
     .asPromise()
     .then(res => {
@@ -35,46 +36,16 @@ export const flatternGeocodingResult = (result: map.GeocodingResult) => {
     formattedAddress: result.formatted_address,
     latitude: result.geometry.location.lat,
     longitude: result.geometry.location.lng,
-    placeId: result.place_id,
   };
 };
 
-export const geocodeRawItemTP = async (item: RawItemTP) => {
-  await Promise.all(
-    extendAddress(item.LOCATION).map(async location => {
-      const isExists = Boolean(
-        await RawLocation.findOne({
-          where: {
-            location,
-          },
-        })
-      );
-      if (!isExists) {
-        const geocoded = await geocode(location);
-        if (geocoded) {
-          const geo = await Geo.create(flatternGeocodingResult(geocoded));
-          const rawLocation = await RawLocation.create({
-            location,
-            geoId: geo.id,
-          });
-          await LocationAssociation.create({
-            rawItemTPId: item.id,
-            locationId: rawLocation.id,
-          });
-        }
-      }
-    })
-  );
-
-  const updatedItem = (await RawItemTP.findOne({
-    where: {
-      id: item.id,
-    },
-    include: [RawLocation],
-  }))!;
-
-  if (updatedItem.locations.length === extendAddress(item.LOCATION).length) {
-    await item.update({
+export const geocodeAddress = async (rawLocation: RawLocation) => {
+  const geocoded = await geocode(rawLocation.location);
+  if (geocoded) {
+    const geo = await Geo.create(flatternGeocodingResult(geocoded));
+    await rawLocation.update({
+      geoId: geo.id,
+      isValid: true,
       geocodedAt: Sequelize.literal('CURRENT_TIMESTAMP'),
     });
   }
