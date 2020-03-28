@@ -81,7 +81,13 @@ export const transformPrice = async (
         const rawItems = await RawItemTP.bulkCreate(transformeds, {
           ignoreDuplicates: true,
         });
-        await Promise.all(rawItems.map(addRawLocationByRawItemTp));
+        await Promise.all(
+          rawItems.map(item =>
+            addRawLocationByRawItemTp(item).catch(() => {
+              console.warn('Skip raw item', item);
+            })
+          )
+        );
         transformedFiles.push({
           name,
           num_entries: transformeds.length,
