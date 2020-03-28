@@ -82,11 +82,7 @@ export const transformPrice = async (
           ignoreDuplicates: true,
         });
         await Promise.all(
-          rawItems.map(item =>
-            addRawLocationByRawItemTp(item).catch(() => {
-              console.warn('Skip raw item', item);
-            })
-          )
+          rawItems.map(item => addRawLocationByRawItemTp(item))
         );
         transformedFiles.push({
           name,
@@ -115,12 +111,17 @@ export const transformPrice = async (
 };
 
 const addRawLocationByRawItemTp = (rawItem: RawItemTP) => {
-  return RawLocation.bulkCreate(
-    extendAddress(rawItem.LOCATION).map(location => ({
-      location,
-    })),
-    {
-      ignoreDuplicates: true,
-    }
-  );
+  try {
+    const extendeds = extendAddress(rawItem.LOCATION);
+    return RawLocation.bulkCreate(
+      extendeds.map(location => ({
+        location,
+      })),
+      {
+        ignoreDuplicates: true,
+      }
+    );
+  } catch {
+    console.warn('Skip raw item', rawItem.toJSON());
+  }
 };
