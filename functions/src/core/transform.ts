@@ -112,7 +112,9 @@ export const transformPrice = async (
 
 const addRawLocationByRawItemTp = (rawItem: RawItemTP) => {
   try {
-    const extendeds = extendAddress(rawItem.LOCATION);
+    const extendeds = extendAddress(rawItem.LOCATION, {
+      prefix: `台北市${rawItem.DISTRICT}`,
+    });
     return RawLocation.bulkCreate(
       extendeds.map(location => ({
         location,

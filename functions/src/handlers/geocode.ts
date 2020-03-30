@@ -4,15 +4,14 @@ import { geocodeAddress } from '../core/geo';
 import { RawLocation } from '../models/RawLocation';
 
 export const geocodeItem = firebaseRequestHandler(async (req, res) => {
-  const location = await RawLocation.findOne({
+  const locations = await RawLocation.findAll({
     where: {
       geocodedAt: {
         [Op.eq]: null,
       },
     },
+    limit: 10,
   });
-  if (location) {
-    await geocodeAddress(location);
-  }
+  await Promise.all(locations.map(geocodeAddress));
   res.sendStatus(200).end();
 });

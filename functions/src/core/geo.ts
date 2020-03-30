@@ -1,12 +1,11 @@
 import map from '@google/maps';
-
 import { Sequelize } from 'sequelize';
+
 import { GOOGLE_MAPS_API_KEY } from '../../config/config';
 import { Geo } from '../models/Geo';
-import { LocationAssociation } from '../models/LocationAssociation';
-import { RawItemTP } from '../models/RawItemTP';
 import { RawLocation } from '../models/RawLocation';
-import { extendAddress } from './utils';
+import { ADDRESS_TAIWAN } from './regex';
+import { contain } from './utils';
 
 export const geocode: (
   address: string
@@ -39,14 +38,47 @@ export const flatternGeocodingResult = (result: map.GeocodingResult) => {
   };
 };
 
+const checkValid = (address: string, geocodeResult: map.GeocodingResult) => {
+  const addressMatched = address.match(ADDRESS_TAIWAN);
+  const geocodedMatched = geocodeResult.formatted_address.match(ADDRESS_TAIWAN);
+
+  if (!addressMatched || !geocodedMatched) {
+    return false;
+  }
+
+  const geocodedFragments = new Set(
+    geocodedMatched.slice(1).filter(e => e != null)
+  );
+  const addressFragments = new Set(
+    addressMatched.slice(1).filter(e => e != null)
+  );
+
+  if (
+    contain(geocodedFragments, addressFragments) ||
+    contain(addressFragments, geocodedFragments)
+  ) {
+    return true;
+  }
+  console.warn('Invalid deteced', addressFragments, geocodedFragments);
+  return false;
+};
+
 export const geocodeAddress = async (rawLocation: RawLocation) => {
+  let geoId = null;
+  let isValid = false;
+  const geocodedAt = Sequelize.literal('CURRENT_TIMESTAMP');
+
   const geocoded = await geocode(rawLocation.location);
   if (geocoded) {
-    const geo = await Geo.create(flatternGeocodingResult(geocoded));
-    await rawLocation.update({
-      geoId: geo.id,
-      isValid: true,
-      geocodedAt: Sequelize.literal('CURRENT_TIMESTAMP'),
-    });
+    isValid = checkValid(rawLocation.location, geocoded);
+    if (isValid) {
+      const geo = await Geo.create(flatternGeocodingResult(geocoded));
+      geoId = geo.id;
+    }
   }
+  await rawLocation.update({
+    geoId,
+    isValid,
+    geocodedAt,
+  });
 };
