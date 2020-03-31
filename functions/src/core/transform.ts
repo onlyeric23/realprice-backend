@@ -10,6 +10,7 @@ import {
   getRealPriceFilename,
 } from './storage';
 import { extendAddress } from './utils';
+import { LocationAssociation } from '../models/LocationAssociation';
 
 export enum TransformResult {
   NO_AVAILABLE_FILE,
@@ -110,18 +111,24 @@ export const transformPrice = async (
   }
 };
 
-const addRawLocationByRawItemTp = (rawItem: RawItemTP) => {
+const addRawLocationByRawItemTp = async (rawItem: RawItemTP) => {
   try {
     const extendeds = extendAddress(rawItem.LOCATION, {
       prefix: `台北市${rawItem.DISTRICT}`,
     });
-    return RawLocation.bulkCreate(
+    const locations = await RawLocation.bulkCreate(
       extendeds.map(location => ({
         location,
       })),
       {
         ignoreDuplicates: true,
       }
+    );
+    await LocationAssociation.bulkCreate(
+      locations.map(location => ({
+        locationId: location.id,
+        rawItemTPId: rawItem.id,
+      }))
     );
   } catch {
     console.warn('Skip raw item', rawItem.toJSON());
