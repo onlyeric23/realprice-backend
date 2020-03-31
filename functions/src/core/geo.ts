@@ -65,13 +65,11 @@ const checkValid = (address: string, geocodeResult: map.GeocodingResult) => {
 
 export const geocodeAddress = async (rawLocation: RawLocation) => {
   let geoId = null;
-  let isValid = false;
   const geocodedAt = Sequelize.literal('CURRENT_TIMESTAMP');
 
   const geocoded = await geocode(rawLocation.location);
   if (geocoded) {
-    isValid = checkValid(rawLocation.location, geocoded);
-    if (isValid) {
+    if (checkValid(rawLocation.location, geocoded)) {
       const [geo] = await Geo.bulkCreate([flatternGeocodingResult(geocoded)], {
         ignoreDuplicates: true,
       });
@@ -80,7 +78,6 @@ export const geocodeAddress = async (rawLocation: RawLocation) => {
   }
   await rawLocation.update({
     geoId,
-    isValid,
     geocodedAt,
   });
 };

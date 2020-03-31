@@ -48,4 +48,8 @@ export class RawLocation extends Model<RawLocation> {
     () => LocationAssociation
   )
   rawItemTPs: Array<RawItemTP & { LocationAssociation: LocationAssociation }>;
+
+  isValid() {
+    return this.geocodedAt && this.geoId;
+  }
 }
