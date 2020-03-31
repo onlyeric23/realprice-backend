@@ -72,7 +72,9 @@ export const geocodeAddress = async (rawLocation: RawLocation) => {
   if (geocoded) {
     isValid = checkValid(rawLocation.location, geocoded);
     if (isValid) {
-      const geo = await Geo.create(flatternGeocodingResult(geocoded));
+      const [geo] = await Geo.bulkCreate([flatternGeocodingResult(geocoded)], {
+        ignoreDuplicates: true,
+      });
       geoId = geo.id;
     }
   }
