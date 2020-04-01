@@ -10,7 +10,7 @@ export const geocodeItem = firebaseRequestHandler(async (req, res) => {
         [Op.eq]: null,
       },
     },
-    limit: 10,
+    limit: 1,
   });
   await Promise.all(locations.map(geocodeAddress));
   res.sendStatus(200).end();

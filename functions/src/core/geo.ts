@@ -1,4 +1,5 @@
 import map from '@google/maps';
+import round from 'lodash/round';
 import { Sequelize } from 'sequelize';
 
 import { GOOGLE_MAPS_API_KEY } from '../../config/config';
@@ -32,9 +33,9 @@ export const geocode: (
 
 export const flatternGeocodingResult = (result: map.GeocodingResult) => {
   return {
-    formattedAddress: result.formatted_address,
-    latitude: result.geometry.location.lat,
-    longitude: result.geometry.location.lng,
+    formatted_address: result.formatted_address,
+    lat: round(result.geometry.location.lat, 6),
+    lng: round(result.geometry.location.lng, 6),
   };
 };
 
@@ -70,8 +71,17 @@ export const geocodeAddress = async (rawLocation: RawLocation) => {
   const geocoded = await geocode(rawLocation.location);
   if (geocoded) {
     if (checkValid(rawLocation.location, geocoded)) {
-      const [geo] = await Geo.bulkCreate([flatternGeocodingResult(geocoded)], {
-        ignoreDuplicates: true,
+      const {
+        formatted_address: formattedAddress,
+        lat: latitude,
+        lng: longitude,
+      } = flatternGeocodingResult(geocoded);
+      const [geo] = await Geo.findOrCreate({
+        where: {
+          formattedAddress,
+          latitude,
+          longitude,
+        },
       });
       geoId = geo.id;
     }

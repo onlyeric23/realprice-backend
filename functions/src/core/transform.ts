@@ -1,5 +1,6 @@
 import get from 'lodash/get';
 import { parseStringPromise } from 'xml2js';
+import { LocationAssociation } from '../models/LocationAssociation';
 import { RawItemTP } from '../models/RawItemTP';
 import { RawLocation } from '../models/RawLocation';
 import { TransformedFile } from '../models/TransformedFile';
@@ -10,7 +11,6 @@ import {
   getRealPriceFilename,
 } from './storage';
 import { extendAddress } from './utils';
-import { LocationAssociation } from '../models/LocationAssociation';
 
 export enum TransformResult {
   NO_AVAILABLE_FILE,
@@ -83,7 +83,9 @@ export const transformPrice = async (
           ignoreDuplicates: true,
         });
         await Promise.all(
-          rawItems.map(item => addRawLocationByRawItemTp(item))
+          rawItems
+            .filter(item => !!item.id)
+            .map(item => addRawLocationByRawItemTp(item))
         );
         transformedFiles.push({
           name,
@@ -125,10 +127,15 @@ const addRawLocationByRawItemTp = async (rawItem: RawItemTP) => {
       }
     );
     await LocationAssociation.bulkCreate(
-      locations.map(location => ({
-        locationId: location.id,
-        rawItemTPId: rawItem.id,
-      }))
+      locations
+        .filter(location => !!location.id)
+        .map(location => ({
+          locationId: location.id,
+          rawItemTPId: rawItem.id,
+        })),
+      {
+        ignoreDuplicates: true,
+      }
     );
   } catch {
     console.warn('Skip raw item', rawItem.toJSON());
