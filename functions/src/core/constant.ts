@@ -8,11 +8,6 @@ export const GOV_REAL_PRICE_DATA =
 export const CLOUD_STORAGE_BUCKET = 'realprice-45367.appspot.com';
 export const STORAGE_RESOURCES = 'resources';
 
-// Firestore
-export const DB_COLLECTION_REAL_PRICE = 'realPrice';
-export const DB_COLLECTION_ITEMS = 'items';
-export const FIRESTORE_BATCH_WRITE_MAX = 500;
-
 // Google Maps
 export const MAPS_GEOCODNG_REQUEST_LIMIT_PER_MONTH = 40000;
 
